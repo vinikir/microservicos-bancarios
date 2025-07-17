@@ -1,0 +1,125 @@
+# Estrutura inicial de um sistema bancário com microserviços
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://auth_user:auth_pass@auth-db:5432/auth
+    depends_on:
+      - auth-db
+    networks:
+      - backend
+
+  auth-db:
+    image: postgres:15.6-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: auth
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  account-service:
+    build:
+      context: ./account-service
+    ports:
+      - "3002:3000"
+    environment:
+      - DATABASE_URL=postgresql://acc_user:acc_pass@account-db:5432/account
+    depends_on:
+      - account-db
+    networks:
+      - backend
+
+  account-db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: acc_user
+      POSTGRES_PASSWORD: acc_pass
+      POSTGRES_DB: account
+    ports:
+      - "5434:5432"
+    volumes:
+      - account_pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  node-service:
+    build:
+      context: ./node-service
+    ports:
+      - "3003:3000"
+    volumes:
+      - ./node-service:/app
+      - /app/node_modules
+    command: yarn dev
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "8080:3000"
+    depends_on:
+      - auth-service
+      - account-service
+      - transaction-service
+    networks:
+      - backend
+
+
+  transaction-service:
+    build:
+      context: ./transaction-service
+    ports:
+      - "3004:3000"
+    environment:
+      - DATABASE_URL=postgresql://trans_user:trans_pass@transaction-db:5432/transaction
+    volumes:
+      - ./transaction-service:/app
+      - /app/node_modules
+    command: yarn dev
+    depends_on:
+      - transaction-db
+    networks:
+      - backend
+
+  transaction-db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: trans_user
+      POSTGRES_PASSWORD: trans_pass
+      POSTGRES_DB: transaction
+    ports:
+      - "5435:5432"
+    volumes:
+      - transaction_pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      
+volumes:
+  auth_pgdata:
+  account_pgdata:
+  transaction_pgdata:
+
+networks:
+  backend:

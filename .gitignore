@@ -1,0 +1,36 @@
+# Node.js
+**/node_modules/
+**/dist/
+**/build/
+**/.env
+**/.DS_Store
+**/yarn-error.log
+**/npm-debug.log
+**/yarn.lock
+
+# Logs
+*.log
+
+# Docker
+**/docker-compose.override.yml
+**/Dockerfile*
+
+# Go
+**/bin/
+**/obj/
+**/vendor/
+**/*.exe
+**/*.dll
+**/*.so
+**/*.dylib
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Mac
+.DS_Store
