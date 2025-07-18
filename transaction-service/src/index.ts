@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
   res.send('Transaction Service OK');
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {
   console.log(`Transaction service running on port ${PORT}`);
 });

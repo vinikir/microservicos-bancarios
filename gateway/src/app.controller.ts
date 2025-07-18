@@ -3,22 +3,19 @@ import { Request, Response } from 'express';
 import { HttpService as NestHttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
-@Controller()
+@Controller("/teste")
 export class AppController {
   constructor(private readonly httpService: NestHttpService) {}
 
-  @Get('auth/*')
+  @Get('t')
   async proxyAuth(@Req() req: Request, @Res() res: Response) {
-    const url = `http://auth-service:3000${req.url.replace('/auth', '')}`;
-    const response = await firstValueFrom(this.httpService.get(url));
-    res.status(response.status).json(response.data);
+   
+    res.status(200).json({"ok":true});
   }
 
-  @Get('account/*')
+  @Get('c')
   async proxyAccount(@Req() req: Request, @Res() res: Response) {
-    const url = `http://account-service:3000${req.url.replace('/account', '')}`;
-    const response = await firstValueFrom(this.httpService.get(url));
-    res.status(response.status).json(response.data);
+    res.status(200).json({"ok2":true});
   }
 
   // Você pode adicionar outros proxies aqui

@@ -16,4 +16,9 @@ export class UsersController {
     listarUsuarios() {
         return [{ id: 1, nome: 'Usuário de exemplo' }];
     }
+
+    @MessagePattern('create-user')
+    async createUser(data: any) {
+        return this.usersService.create(data); // Lógica real aqui
+    }
 }

@@ -4,14 +4,29 @@ services:
     build:
       context: ./auth-service
     ports:
-      - "3001:3000"
+      - "3001:3001"
     environment:
       - DATABASE_URL=postgresql://auth_user:auth_pass@auth-db:5432/auth
     depends_on:
       - auth-db
     networks:
       - backend
-
+  rabbitmq:
+    build: ./rabbitmq
+    container_name: 'rabbitmq'
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - backend 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   auth-db:
     image: postgres:15.6-alpine
     restart: always
@@ -30,7 +45,7 @@ services:
     build:
       context: ./account-service
     ports:
-      - "3002:3000"
+      - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://acc_user:acc_pass@account-db:5432/account
     depends_on:
@@ -56,7 +71,7 @@ services:
     build:
       context: ./node-service
     ports:
-      - "3003:3000"
+      - "3003:3003"
     volumes:
       - ./node-service:/app
       - /app/node_modules
@@ -68,11 +83,12 @@ services:
     build:
       context: ./gateway
     ports:
-      - "8080:3000"
+      - "3002:3002"
     depends_on:
       - auth-service
       - account-service
       - transaction-service
+      - rabbitmq 
     networks:
       - backend
 
@@ -81,7 +97,7 @@ services:
     build:
       context: ./transaction-service
     ports:
-      - "3004:3000"
+      - "3004:3004"
     environment:
       - DATABASE_URL=postgresql://trans_user:trans_pass@transaction-db:5432/transaction
     volumes:
@@ -107,14 +123,6 @@ services:
     networks:
       - backend
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
       
 volumes:
   auth_pgdata:
